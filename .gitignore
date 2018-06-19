@@ -1,0 +1,12 @@
+# ignore files
+sepHARData_/
+Dataset_stem/
+Dataset_Alg_SourceDevice/
+Dataset_AccGry_SourceDevice-Creation_Time-avgTime/
+Activity recognition exp/
+
+# ignore cache
+__pycache__/
+
+# ignore IDEA files
+.idea/
