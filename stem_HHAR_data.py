@@ -7,7 +7,7 @@ from time import gmtime, strftime
 from scipy.interpolate import interp1d
 from scipy.fftpack import fft
 
-pairSaveDir = '/home/azamat/Desktop/test_data(28.07.2018)/train'
+pairSaveDir = 'C:\\projects\\data(09.08.2018)\\app_sensor'
 
 sepcturalSamples = 10
 # fftSpan = 0.25
@@ -33,15 +33,15 @@ nameDev = "galaxys8"
 # select = 'j'
 print 'start!'
 
-
-for files in [1, 2, 3, 4, 5, 6, 7, 8]:
-    for users in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
+result = open("file_link_eval.txt", "a")
+counting = 0
+for users in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
         for rooms in [404, 405, 410, 422]:
             for curGt in gtType:
                 curType = gtIdxDict[curGt]
                 curData_Sep = []
-                if os.path.exists(os.path.join(pairSaveDir, curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample'+'_'+ str(files))):
-                    fileIn = open(os.path.join(pairSaveDir, curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample'+'_'+str(files)))
+                if os.path.exists(os.path.join(pairSaveDir, curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample')):
+                    fileIn = open(os.path.join(pairSaveDir, curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample'))
                     line = fileIn.readline()
                     curData = []
                     curAccList = []
@@ -52,6 +52,7 @@ for files in [1, 2, 3, 4, 5, 6, 7, 8]:
                     count = 0
                     realTime = -1
                     while len(line) > 0:
+                        line = line + "}"
                         curElem = eval(line)
                         curTime = float(curElem['Time'] / 1000000000.0)
                         if startTime < 0:
@@ -175,7 +176,9 @@ for files in [1, 2, 3, 4, 5, 6, 7, 8]:
 
                         count += 1
                         line = fileIn.readline()
-                print 'curData_Sep', np.array(curData_Sep).shape
+                    print curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample ' + str(counting) + " :", counting + (np.array(curData_Sep).shape[0] - 1)
+                    result.write("{'filename': '"+curGt+'_'+str(users)+'_'+str(rooms)+'_'+"sample'"+",'data':["+str(counting)+", "+str(counting + (np.array(curData_Sep).shape[0] - 1))+"]}\n")
+                    counting = counting + (np.array(curData_Sep).shape[0])
 
                 if not dataDict.has_key(nameDev):
                     dataDict[nameDev] = [[], []]
@@ -194,6 +197,7 @@ for files in [1, 2, 3, 4, 5, 6, 7, 8]:
                  curOut[curType] = 1.
                  dataDict[nameDev][1].append(deepcopy(curOut))
 
+result.close()
 X = []
 Y = []
 maskX = []
@@ -262,14 +266,14 @@ print 'XY', XY.shape
 #evalX = np.reshape(evalX, [-1, wide * inputFeature])
 #evalXY = np.hstack((evalX, evalY))
 #print 'evalXY', evalXY.shape
-out_dir = '/home/azamat/Desktop/test_data(28.07.2018)/sepHARData_'
+out_dir = 'C:\\projects\\data(09.08.2018)'
 if not os.path.exists(out_dir):
-    os.mkdir(out_dir)
-    os.mkdir(os.path.join(out_dir, 'train'))
+    #os.mkdir(out_dir)
+    os.mkdir(os.path.join(out_dir, 'hhar_data'))
     #os.mkdir(os.path.join(out_dir, 'eval'))
 idx = 0
 for elem in XY:
-    fileOut = open(os.path.join(out_dir, 'train', 'train_' + str(idx) + '.csv'), 'w')
+    fileOut = open(os.path.join(out_dir, 'hhar_data', 'data_' + str(idx) + '.csv'), 'w')
     curOut = elem.tolist()
     curOut = [str(ele) for ele in curOut]
     curOut = ','.join(curOut) + '\n'
