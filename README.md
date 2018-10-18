@@ -1,10 +1,21 @@
-# HHAR-Data-Process
-Code for data processing used for the experiment in paper "Deepsense: a unified deep learning framework for time-series mobile sensing data processing" with Python 2.7
+# Data preprocessing applicaton for paper "Discovering User-context in Indoor Space".
 
-Download the dataset from https://archive.ics.uci.edu/ml/datasets/Heterogeneity+Activity+Recognition.
+We discover user-context in indoor space by combining activity and location context for user. 
 
-```
-python dataAli-sameUserDevice.py
-python pairDataFile.py
-python sep_HHAR_data.py
-```
+This application is forked from [yscacaca/HHAR-Data-Process](https://github.com/yscacaca/HHAR-Data-Process) and modified for data preprocessing purpose in our project. Also, you can see our app for data collection [here](https://github.com/STEMLab/android_sensor_reader).
+
+There is only two main files (``` stem_HHAR_data.py ``` and ``` stem_HHAR_data_eval.py ```) for data preprocessing, other files used for data analysis.
+
+Edit following vars for your data:
+ - ```pairSaveDir```: path to folder with your collected data;
+ - ```gtType```: define actions performed by users in your data;
+ - ```uList```: define list of user's id in your data;
+ - ```roomList```: define list of rooms where data was collected;
+ - ```outdir```: definde output path
+
+Instructions:
+- ``` stem_HHAR_data.py ``` - training data preparation. 
+- ``` stem_HHAR_data.py ``` - eval data preparation.
+
+
+
