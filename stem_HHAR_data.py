@@ -22,6 +22,8 @@ augNum = 10
 
 dataDict = {}
 gtType = ["write", "listen", "speak", "type"]
+uList = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+roomList = [404, 405, 410, 422]
 idxList = range(len(gtType))
 gtIdxDict = dict(zip(gtType, idxList))
 idxGtDict = dict(zip(idxList, gtType))
@@ -35,8 +37,8 @@ print 'start!'
 
 result = open("file_link_eval.txt", "a")
 counting = 0
-for users in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
-        for rooms in [404, 405, 410, 422]:
+for users in uList:
+        for rooms in roomList:
             for curGt in gtType:
                 curType = gtIdxDict[curGt]
                 curData_Sep = []
