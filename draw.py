@@ -5,16 +5,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 from copy import deepcopy
 
+from scipy import signal
+
+def butter_lowpass_filter(data, cut, fs, order, zero_phase=False):
+    from scipy.signal import butter, lfilter, filtfilt
+
+    nyq = 0.5 * fs
+    cut = cut / nyq
+
+    b, a = butter(order, cut, btype='low')
+    y = (filtfilt if zero_phase else lfilter)(b, a, data)
+    return y
+
 if __name__ == "__main__":
 
     data = {}
-    for files in ['listen_4_404_sample', 'speak_4_404_sample', 'type_4_422_sample', 'write_4_422_sample']:
+    for files in ['17-gear_s2-receive_lecture']:
         currAcc = []
         currGyr = []
-        fileIn = open(os.path.join("C:\projects\data(09.08.2018)\\app_sensor", files))
+        fileIn = open(os.path.join("/Users/azamatbolat/Desktop/real-case-data/paired/", files))
         line = fileIn.readline()
         while len(line) > 0:
-            line = line + "}"
             curElem = eval(line)
             currAcc.append(deepcopy(curElem['Accelerometer']))
             currGyr.append(deepcopy(curElem['Gyroscope']))
@@ -24,19 +35,18 @@ if __name__ == "__main__":
 
     fig, axes = plt.subplots(nrows=2, ncols=2)
     axes[0, 0].get_yaxis().set_label_coords(-0.20, 0.5)
-    test = np.array(data['listen_4_404_sample']["gyr"])
+    test = np.array(data['17-gear_s2-receive_lecture']["gyr"])
     axes[0, 0].set_title('Listening')
-    axes[0, 0].plot(test[:100000])
+    axes[0, 0].plot(test)
 
-    axes[0, 1].set_title('Speaking')
-    axes[0, 1].plot(np.array(data['speak_4_404_sample']["gyr"])[:100000])
+    medium = signal.medfilt(test)
+    axes[0, 1].plot(medium)
+    axes[0, 1].set_ylim(-500, 400)
 
-    axes[1, 0].set_title('Typing')
-    axes[1, 0].plot(np.array(data['type_4_422_sample']["gyr"])[:100000])
-    axes[1, 0].get_yaxis().set_label_coords(-0.20, 0.5)
+    low = butter_lowpass_filter(test[0], 2, 50, 4, zero_phase=True)
 
-    axes[1, 1].set_title('Writing')
-    axes[1, 1].plot(np.array(data['write_4_422_sample']["gyr"])[:100000])
+    axes[1, 0].plot(low)
+    axes[1, 0].set_ylim(-500, 400)
 
     axes[0, 0].set_xlabel('Samples (n)')
     axes[0, 0].set_ylabel('Rate of rotation (rad/s)')

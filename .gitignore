@@ -4,9 +4,14 @@ Dataset_stem/
 Dataset_Alg_SourceDevice/
 Dataset_AccGry_SourceDevice-Creation_Time-avgTime/
 Activity recognition exp/
+data-own-collected/**
+processed/
+to-process/
+data-from-web/**
 
 # ignore cache
 __pycache__/
 
 # ignore IDEA files
 .idea/
+**/.DS_Store

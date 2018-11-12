@@ -7,12 +7,12 @@ from time import gmtime, strftime
 from scipy.interpolate import interp1d
 from scipy.fftpack import fft
 
-pairSaveDir = 'C:\\projects\\data(09.08.2018)\\app_sensor'
+pairSaveDir = '/Users/azamatbolat/Desktop/simulation/paired/'
 
 sepcturalSamples = 10
 # fftSpan = 0.25
 # SampSpan = 5.
-fftSpan = 5.
+fftSpan = 3.
 SampSpan = 20.
 
 timeNoiseVar = 0.2
@@ -21,183 +21,207 @@ gyroNoiseVar = 0.2
 augNum = 10
 
 dataDict = {}
-gtType = ["write", "listen", "speak", "type"]
-uList = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-roomList = [404, 405, 410, 422]
+gtType = ["receive_lecture", "give_lecture", "working"]
+#uList = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+#roomList = [404, 405, 410, 422]
 idxList = range(len(gtType))
 gtIdxDict = dict(zip(gtType, idxList))
 idxGtDict = dict(zip(idxList, gtType))
 wide = 20
 wideScaleFactor = 4
 labEvery = False
-nameDev = "galaxys8"
+#nameDevList = ['gear_s2','gear_1','gear_2','lgwatch_1','lgwatch_2']
+#nameDev = "galaxys8"
 # mode = 'one_user_out'
 # select = 'j'
+
+dataList = os.listdir(pairSaveDir)
+nameDevList = []
+for dataFile in dataList:
+    if dataFile[0] == '.':
+        continue
+    if dataFile[0] == '#':
+        continue
+    elems = dataFile.split("-")
+    curLable = '-'.join(elems[:-1])
+    if curLable not in nameDevList:
+        nameDevList.append(curLable)
+
 print 'start!'
 
 result = open("file_link_eval.txt", "a")
 counting = 0
-for users in uList:
-        for rooms in roomList:
-            for curGt in gtType:
-                curType = gtIdxDict[curGt]
-                curData_Sep = []
-                if os.path.exists(os.path.join(pairSaveDir, curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample')):
-                    fileIn = open(os.path.join(pairSaveDir, curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample'))
-                    line = fileIn.readline()
-                    curData = []
-                    curAccList = []
-                    curGyroList = []
-                    curTimeList = []
-                    lastTime = -1
-                    startTime = -1
-                    count = 0
-                    realTime = -1
-                    while len(line) > 0:
-                        line = line + "}"
-                        curElem = eval(line)
-                        curTime = float(curElem['Time'] / 1000000000.0)
-                        if startTime < 0:
-                            startTime = curTime
-                            if count == 0:
-                                realTime = curTime
-                            if startTime < 0:
-                                print 'Wrong!'
-                                test = raw_input('continue')
-                        if abs(curTime - startTime) > fftSpan:
-                            if len(curAccList) > 0:
-                                if curTimeList[-1] < fftSpan:
-                                    curAccList.append(deepcopy(curAccList[-1]))
-                                    curGyroList.append(deepcopy(curGyroList[-1]))
-                                    curTimeList.append(fftSpan)
-                                curAccListOrg = np.array(curAccList).T
-                                curGyroListOrg = np.array(curGyroList).T
-                                curTimeListOrg = np.array(curTimeList)
+#for users in uList:
+        #for rooms in roomList:
+for nameDev in nameDevList:
+    for curGt in gtType:
+        curType = gtIdxDict[curGt]
+        curData_Sep = []
+        if os.path.exists(os.path.join(pairSaveDir, nameDev + '-' + curGt)):
+            fileIn = open(os.path.join(pairSaveDir, nameDev + '-' + curGt))
+            line = fileIn.readline()
+            curData = []
+            curAccList = []
+            curGyroList = []
+            curTimeList = []
+            lastTime = -1
+            startTime = -1
+            count = 0
+            realTime = -1
+            while len(line) > 0:
+                #line = line + "}"
+                curElem = eval(line)
+                #curTime = float(curElem['Time'] / 1000000.0)
+                curTime = curElem['Time']
+                if startTime < 0:
+                    startTime = curTime
+                    if count == 0:
+                        realTime = curTime
+                    if startTime < 0:
+                        print 'Wrong!'
+                        test = raw_input('continue')
+                if abs(curTime - startTime) > fftSpan:
+                    if len(curAccList) > 0:
+                        if curTimeList[-1] < fftSpan:
+                            curAccList.append(deepcopy(curAccList[-1]))
+                            curGyroList.append(deepcopy(curGyroList[-1]))
+                            curTimeList.append(fftSpan)
+                        curAccListOrg = np.array(curAccList).T
+                        curGyroListOrg = np.array(curGyroList).T
+                        curTimeListOrg = np.array(curTimeList)
 
-                                # curAugNum = 1
+                        # curAugNum = 1
 
-                                # if mode == 'one_user_out':
-                                # if nameDev[0] == select:
-                                # curAugNum = 1
-                                # else:
-                                # curAugNum = augNum
-                                # elif mode == 'one_model_out':
-                                # if select in nameDev[1:]:
-                                # curAugNum = 1
-                                # else:
-                                # curAugNum = augNum
-                                # else:
-                                # curAugNum = augNum
+                        # if mode == 'one_user_out':
+                        # if nameDev[0] == select:
+                        # curAugNum = 1
+                        # else:
+                        # curAugNum = augNum
+                        # elif mode == 'one_model_out':
+                        # if select in nameDev[1:]:
+                        # curAugNum = 1
+                        # else:
+                        # curAugNum = augNum
+                        # else:
+                        # curAugNum = augNum
 
-                                curAccList = curAccListOrg + 0.
-                                curGyroList = curGyroListOrg + 0.
-                                curTimeList = curTimeListOrg + 0.
+                        curAccList = curAccListOrg + 0.
+                        curGyroList = curGyroListOrg + 0.
+                        curTimeList = curTimeListOrg + 0.
 
-                                curTimeList = np.sort(curTimeList)
-                                if curTimeList[-1] < fftSpan:
-                                    curTimeList[-1] = fftSpan
-                                if curTimeList[0] > 0.:
-                                    curTimeList[0] = 0.
+                        curTimeList = np.sort(curTimeList)
+                        if curTimeList[-1] < fftSpan:
+                            curTimeList[-1] = fftSpan
+                        if curTimeList[0] > 0.:
+                            curTimeList[0] = 0.
 
-                                divTime = 0.0
-                                step = 0.25
-                                idto = 0
-                                counter = 0
-                                for id in xrange(wide):
+                        divTime = 0.0
+                        step = 0.15
+                        idto = 0
+                        counter = 0
+                        for id in xrange(wide):
 
-                                    counter = 0
-                                    for time in curTimeList:
-                                        if divTime <= time <= step:
-                                            counter = counter + 1
-
-
-                                    wideTimeList = curTimeList[idto:idto + counter]
-                                    wideAccList = curAccList[:, idto:idto + counter]
-                                    wideGyroList = curGyroList[:, idto:idto + counter]
-
-                                    if wideTimeList[-1] < step:
-                                        wideTimeList[-1] = step
-                                    if wideTimeList[0] > divTime:
-                                        wideTimeList[0] = 0.
-
-                                    accInterp = interp1d(wideTimeList, wideAccList)
-
-                                    accInterpTime = np.linspace(divTime, step * 1, sepcturalSamples * 1)
-                                    accInterpVal = accInterp(accInterpTime)
-
-                                    accFFT = fft(accInterpVal).T
-                                    accFFTSamp = accFFT[::1] / float(1)
-                                    accFFTFin = []
-                                    for accFFTElem in accFFTSamp:
-                                        for axisElem in accFFTElem:
-                                            accFFTFin.append(axisElem.real)
-                                            accFFTFin.append(axisElem.imag)
-
-                                    gyroInterp = interp1d(wideTimeList, wideGyroList)
-                                    gyroInterpTime = np.linspace(divTime, step * 1, sepcturalSamples * 1)
-                                    gyroInterpVal = gyroInterp(gyroInterpTime)
-                                    gyroFFT = fft(gyroInterpVal).T
-                                    gyroFFTSamp = gyroFFT[::1] / float(1)
-                                    # print 'gyroFFTSamp', gyroFFTSamp.shape
-                                    gyroFFTFin = []
-                                    for gyroFFTElem in gyroFFTSamp:
-                                        for axisElem in gyroFFTElem:
-                                            gyroFFTFin.append(axisElem.real)
-                                            gyroFFTFin.append(axisElem.imag)
-
-                                    curSenData = []
-                                    curSenData += accFFTFin
-                                    curSenData += gyroFFTFin
-
-                                    curData.append(deepcopy(curSenData))
+                            counter = 0
+                            for time in curTimeList:
+                                if divTime <= time <= step:
+                                    counter = counter + 1
 
 
-                                # lastTime = startTime + curTimeList[-1]
-                                    idto = idto + counter
-                                    divTime = step
-                                    step = step + 0.25
+                            wideTimeList = curTimeList[idto:idto + counter]
+                            wideAccList = curAccList[:, idto:idto + counter]
+                            wideGyroList = curGyroList[:, idto:idto + counter]
 
-                                #for curAugData in curData:
-                                    #curData_Sep.append([deepcopy(curAugData)])
-                                curData_Sep.append(deepcopy(curData))
+                            if len(wideTimeList) < 2:
+                                print "Bad device: " + fileIn.name
                                 curData = []
+                                break
 
-                                startTime = -1
-                                curAccList = []
-                                curGyroList = []
-                                curTimeList = []
-                        if startTime < 0:
-                            startTime = curTime
-                            if startTime < 0:
-                                print 'Wrong!'
-                                test = raw_input('continue')
-                        if curTime - startTime not in curTimeList:
-                            curAccList.append(deepcopy(curElem['Accelerometer']))
-                            curGyroList.append(deepcopy(curElem['Gyroscope']))
-                            curTimeList.append(curTime - startTime)
+                            if wideTimeList[-1] < step:
+                                wideTimeList[-1] = step
+                            if wideTimeList[0] > divTime:
+                                wideTimeList[0] = 0.
 
-                        count += 1
-                        line = fileIn.readline()
-                    print curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample ' + str(counting) + " :", counting + (np.array(curData_Sep).shape[0] - 1)
-                    result.write("{'filename': '"+curGt+'_'+str(users)+'_'+str(rooms)+'_'+"sample'"+",'data':["+str(counting)+", "+str(counting + (np.array(curData_Sep).shape[0] - 1))+"]}\n")
-                    counting = counting + (np.array(curData_Sep).shape[0])
 
-                if not dataDict.has_key(nameDev):
-                    dataDict[nameDev] = [[], []]
+                            accInterp = interp1d(wideTimeList, wideAccList)
 
-                for sepData in curData_Sep:
-                    #staIdx = 0
-                    #while staIdx < len(sepData):
-                        #endIdx = min(staIdx + wide, len(sepData))
-                        #if endIdx - staIdx < 5:
-                            #if endIdx - staIdx < wide:
-                                #break
-                        #else:
-                            #print("no")
-                 dataDict[nameDev][0].append(deepcopy(sepData))
-                 curOut = [0.] * len(gtType)
-                 curOut[curType] = 1.
-                 dataDict[nameDev][1].append(deepcopy(curOut))
+                            accInterpTime = np.linspace(divTime, step * 1, sepcturalSamples * 1)
+                            accInterpVal = accInterp(accInterpTime)
+
+                            accFFT = fft(accInterpVal).T
+                            accFFTSamp = accFFT[::1] / float(1)
+                            accFFTFin = []
+                            for accFFTElem in accFFTSamp:
+                                for axisElem in accFFTElem:
+                                    accFFTFin.append(axisElem.real)
+                                    accFFTFin.append(axisElem.imag)
+
+                            gyroInterp = interp1d(wideTimeList, wideGyroList)
+                            gyroInterpTime = np.linspace(divTime, step * 1, sepcturalSamples * 1)
+                            gyroInterpVal = gyroInterp(gyroInterpTime)
+                            gyroFFT = fft(gyroInterpVal).T
+                            gyroFFTSamp = gyroFFT[::1] / float(1)
+                            # print 'gyroFFTSamp', gyroFFTSamp.shape
+                            gyroFFTFin = []
+                            for gyroFFTElem in gyroFFTSamp:
+                                for axisElem in gyroFFTElem:
+                                    gyroFFTFin.append(axisElem.real)
+                                    gyroFFTFin.append(axisElem.imag)
+
+                            curSenData = []
+                            curSenData += accFFTFin
+                            curSenData += gyroFFTFin
+
+                            curData.append(deepcopy(curSenData))
+
+
+                        # lastTime = startTime + curTimeList[-1]
+                            idto = idto + counter
+                            divTime = step
+                            step = step + 0.15
+
+                        #for curAugData in curData:
+                            #curData_Sep.append([deepcopy(curAugData)])
+                        curData_Sep.append(deepcopy(curData))
+                        curData = []
+
+                        startTime = -1
+                        curAccList = []
+                        curGyroList = []
+                        curTimeList = []
+                if startTime < 0:
+                    startTime = curTime
+                    if startTime < 0:
+                        print 'Wrong!'
+                        test = raw_input('continue')
+                if curTime - startTime not in curTimeList:
+                    curAccList.append(deepcopy(curElem['Accelerometer']))
+                    curGyroList.append(deepcopy(curElem['Gyroscope']))
+                    curTimeList.append(curTime - startTime)
+
+                count += 1
+                line = fileIn.readline()
+            #print curGt+'_'+str(users)+'_'+str(rooms)+'_'+'sample ' + str(counting) + " :", counting + (np.array(curData_Sep).shape[0] - 1)
+            #result.write("{'filename': '"+curGt+'_'+str(users)+'_'+str(rooms)+'_'+"sample'"+",'data':["+str(counting)+", "+str(counting + (np.array(curData_Sep).shape[0] - 1))+"]}\n")
+            counting = counting + (np.array(curData_Sep).shape[0])
+
+            print 'curData_Sep ' + fileIn.name + ' :', np.array(curData_Sep).shape
+        if not dataDict.has_key(nameDev):
+            dataDict[nameDev] = [[], []]
+
+
+        for sepData in curData_Sep:
+            #staIdx = 0
+            #while staIdx < len(sepData):
+                #endIdx = min(staIdx + wide, len(sepData))
+                #if endIdx - staIdx < 5:
+                    #if endIdx - staIdx < wide:
+                        #break
+                #else:
+                    #print("no")
+         dataDict[nameDev][0].append(deepcopy(sepData))
+         curOut = [0.] * len(gtType)
+         curOut[curType] = 1.
+         dataDict[nameDev][1].append(deepcopy(curOut))
 
 result.close()
 X = []
@@ -268,14 +292,14 @@ print 'XY', XY.shape
 #evalX = np.reshape(evalX, [-1, wide * inputFeature])
 #evalXY = np.hstack((evalX, evalY))
 #print 'evalXY', evalXY.shape
-out_dir = 'C:\\projects\\data(09.08.2018)'
-if not os.path.exists(out_dir):
+out_dir = '/Users/azamatbolat/Desktop/simulation/'
+if not os.path.exists(os.path.join(out_dir, 'processed')):
     #os.mkdir(out_dir)
-    os.mkdir(os.path.join(out_dir, 'hhar_data'))
+    os.mkdir(os.path.join(out_dir, 'processed'))
     #os.mkdir(os.path.join(out_dir, 'eval'))
 idx = 0
 for elem in XY:
-    fileOut = open(os.path.join(out_dir, 'hhar_data', 'data_' + str(idx) + '.csv'), 'w')
+    fileOut = open(os.path.join(out_dir, 'processed', 'data_' + str(idx) + '.csv'), 'w')
     curOut = elem.tolist()
     curOut = [str(ele) for ele in curOut]
     curOut = ','.join(curOut) + '\n'
